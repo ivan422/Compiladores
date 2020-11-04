@@ -15,10 +15,13 @@ import java.io.IOException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import ventana.Token.Tipos;
 
 /**
  *
@@ -26,15 +29,41 @@ import javax.swing.JOptionPane;
  */
 public class Compilador extends javax.swing.JFrame {
 
-    String texto="";
-    String valores ="";
+    String texto = "";
+    String valores = "";
 
-    
     public Compilador() {
         initComponents();
         this.setLocationRelativeTo(null);
     }
+    
+    private static ArrayList<Token> lex(String input) {
+        final ArrayList<Token> tokens = new ArrayList<Token>();
+        final StringTokenizer st = new StringTokenizer(input);
 
+        while(st.hasMoreTokens()) {
+            String palabra = st.nextToken();
+            boolean matched = false;
+
+            for (Tipos tokenTipo : Tipos.values()) {
+                Pattern patron = Pattern.compile(tokenTipo.patron, Pattern.MULTILINE);
+                Matcher matcher = patron.matcher(palabra);
+                if(matcher.find()) {
+                    Token tk = new Token();
+                    tk.setTipo(tokenTipo);
+                    tk.setValor(palabra);
+                    tokens.add(tk);
+                    matched = true;
+                }
+            }
+            if (!matched) {
+                throw new RuntimeException("Se encontró un token invalido.");
+            }
+        }
+       return tokens;
+    }
+
+    
     
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -51,6 +80,7 @@ public class Compilador extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         resultado = new javax.swing.JTextArea();
         jLabel1 = new javax.swing.JLabel();
+        token = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -97,6 +127,13 @@ public class Compilador extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jLabel1.setText("Consola");
 
+        token.setText("Tokens");
+        token.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tokenActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -106,17 +143,19 @@ public class Compilador extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jScrollPane2)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                    .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(ruta)
                             .addComponent(expresion))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addComponent(abrir)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jButton1)))))
+                            .addComponent(token, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                    .addComponent(abrir)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(jButton1))))))
                 .addContainerGap())
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(254, 254, 254)
@@ -131,13 +170,15 @@ public class Compilador extends javax.swing.JFrame {
                     .addComponent(jButton1)
                     .addComponent(abrir)
                     .addComponent(ruta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton3)
-                    .addComponent(expresion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(expresion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton3))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(token)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 32, Short.MAX_VALUE)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 167, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -163,8 +204,8 @@ public class Compilador extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-       String resultado1= resultado.getText();
-       guardarComo(resultado1);
+        String resultado1 = resultado.getText();
+        guardarComo(resultado1);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void rutaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rutaActionPerformed
@@ -176,25 +217,25 @@ public class Compilador extends javax.swing.JFrame {
         final Matcher matcher = pattern.matcher(txt);
 
         while (matcher.find()) {
-            
+
             for (int i = 0; i <= matcher.groupCount(); i++) {
-                
-                valores += matcher.group(i)+"\n";
-                System.out.println("Group " + i + ": " + matcher.group(i));
+
+                valores += matcher.group(i) + "\n";
             }
-            
-        }resultado.setText(valores);
+
+        }
+        resultado.setText(valores);
 
     }
-    
-   public void guardarComo(String cadena){
+
+    public void guardarComo(String cadena) {
 
         JFileChooser guardar = new JFileChooser();
         guardar.showSaveDialog(null);
         guardar.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
         File archivo = guardar.getSelectedFile();
-    
+
         FileWriter escribir;
         try {
 
@@ -247,6 +288,16 @@ public class Compilador extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jButton3ActionPerformed
 
+    private void tokenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tokenActionPerformed
+       String input = Vista.getText();
+        ArrayList<Token> tokens = lex(input);
+        String result="";
+        for (Token token : tokens) {
+            result+= "(" + token.getTipo() + ": " + token.getValor() + ")" + "\n";          
+        }
+        resultado.setText(result);
+    }//GEN-LAST:event_tokenActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -294,6 +345,7 @@ public class Compilador extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextArea resultado;
     private javax.swing.JTextField ruta;
+    private javax.swing.JButton token;
     // End of variables declaration//GEN-END:variables
 
     private String abrirarchivo(File archivo) {
